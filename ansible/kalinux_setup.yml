@@ -1,0 +1,35 @@
+---
+- hosts: all
+  remote_user: root
+  tasks:
+    - name: Upgrade packages
+      apt:
+        upgrade: full
+    - name: Install packages for keyserver
+      apt:
+        pkg:
+          - git
+          - gnupg2
+          - python3
+    #  apt-key adv --keyserver keyserver.ubuntu.com --recv ED444FF07D8D0BF6
+    - name: Install kali linux repository key
+      apt_key:
+        keyserver: keyserver.ubuntu.com
+        id: ED444FF07D8D0BF6
+    - name: install katoolin
+      git:
+        repo: https://github.com/lagovas/katoolin3
+        dest: /tmp/katoolin3
+    - name: Use more stable keyserver
+      replace:
+        path: /tmp/katoolin3/install.sh
+        regexp: '^pool\.sks\-keyservers\.net$'
+        replace: 'keyserver.ubuntu.com'
+    - name: make executable katoolin3
+      file:
+        path: /tmp/katoolin3/install.sh
+        mode: u+rx,g=r,o=r
+    - name: Install katoolin3
+      shell: /tmp/katoolin3/install.sh
+      args:
+        chdir: /tmp/katoolin3
